@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 import Modal from "react-modal";
 import closeImg from "../../assets/close.svg";
 import incomeImg from "../../assets/income.svg";
 import outcomeImg from "../../assets/outcome.svg";
+import { api } from "../../services/api";
 import { Container, TransactionTypeContainer, RadioBox } from "./styles";
 
 interface NewTransactionModalProps {
@@ -15,6 +16,22 @@ export function NewTransactionModal({
   onRequestClose,
 }: NewTransactionModalProps) {
   const [type, setType] = useState("deposit");
+
+  const [title, setTitle] = useState("");
+  const [amount, setAmount] = useState(0);
+  const [category, setCategory] = useState("");
+
+  const handleCreateNewTransaction = (event: FormEvent) => {
+    event.preventDefault();
+    const data = {
+      title,
+      amount,
+      category,
+      type,
+    };
+
+    api.post("/transactions", data);
+  };
 
   return (
     <Modal
@@ -30,11 +47,27 @@ export function NewTransactionModal({
       >
         <img src={closeImg} alt="Fechar modal" />
       </button>
-      <Container>
+      <Container onSubmit={handleCreateNewTransaction}>
         <h2>Cadastrar Transação</h2>
-        <input placeholder="Título" />
-        <input type="number" placeholder="Valor" />
-        <input placeholder="Categoria" />
+
+        <input
+          placeholder="Título"
+          value={title}
+          onChange={(event) => setTitle(event.target.value)}
+        />
+
+        <input
+          type="number"
+          placeholder="Valor"
+          value={amount}
+          onChange={(event) => setAmount(Number(event.target.value))}
+        />
+
+        <input
+          placeholder="Categoria"
+          value={category}
+          onChange={(event) => setCategory(event.target.value)}
+        />
         <TransactionTypeContainer>
           <RadioBox
             type="button"
