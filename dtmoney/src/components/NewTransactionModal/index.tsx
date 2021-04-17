@@ -1,9 +1,11 @@
 import { FormEvent, useState } from "react";
 import Modal from "react-modal";
+
 import closeImg from "../../assets/close.svg";
 import incomeImg from "../../assets/income.svg";
 import outcomeImg from "../../assets/outcome.svg";
-import { api } from "../../services/api";
+import { useTransactions } from "../hooks/useTransactions";
+
 import { Container, TransactionTypeContainer, RadioBox } from "./styles";
 
 interface NewTransactionModalProps {
@@ -15,23 +17,27 @@ export function NewTransactionModal({
   isOpen,
   onRequestClose,
 }: NewTransactionModalProps) {
-  const [type, setType] = useState("deposit");
+  const { createTransaction } = useTransactions();
 
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState(0);
   const [category, setCategory] = useState("");
+  const [type, setType] = useState("deposit");
 
-  const handleCreateNewTransaction = (event: FormEvent) => {
+  async function handleCreateNewTransaction(event: FormEvent) {
     event.preventDefault();
-    const data = {
+    await createTransaction({
       title,
       amount,
       category,
       type,
-    };
-
-    api.post("/transactions", data);
-  };
+    });
+    setTitle("");
+    setAmount(0);
+    setCategory("");
+    setType("deposit");
+    onRequestClose();
+  }
 
   return (
     <Modal
@@ -92,7 +98,9 @@ export function NewTransactionModal({
             <span>Saída</span>
           </RadioBox>
         </TransactionTypeContainer>
-        <button type="submit">Cadastrar</button>
+        <button type="submit" onClick={handleCreateNewTransaction}>
+          Cadastrar
+        </button>
       </Container>
     </Modal>
   );
